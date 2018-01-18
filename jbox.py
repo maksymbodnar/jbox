@@ -33,36 +33,32 @@ def movie_run(index):
     global movieIndex
     global videoPlayer
     movieIndex = index
-    print `index`
     videoPlayer.terminate()
 
 def movie_loop(index):
     global videoPlayer
     if videoPlayer is not None and not videoPlayer.poll():
         videoPlayer.terminate()
-    print movies[index]
     videoPlayer = subprocess.Popen(['/usr/bin/omxplayer.bin', '-o', 'hdmi', '/home/pi/movies/' + movies[index]], stdout=subprocess.PIPE)
-    print `videoPlayer.pid`
     videoPlayer.wait()
-    print `videoPlayer.pid`
 
 def movie_set_1(channel):
-    movie_run(0)
-
-def movie_set_2(channel):
     movie_run(1)
 
-def movie_set_3(channel):
+def movie_set_2(channel):
     movie_run(2)
 
-def movie_set_4(channel):
+def movie_set_3(channel):
     movie_run(3)
 
-def movie_set_5(channel):
+def movie_set_4(channel):
     movie_run(4)
 
-def movie_set_6(channel):
+def movie_set_5(channel):
     movie_run(5)
+
+def movie_set_6(channel):
+    movie_run(6)
 
 GPIO.add_event_detect(btn1, GPIO.FALLING, callback=movie_set_1, bouncetime=300)
 GPIO.add_event_detect(btn2, GPIO.FALLING, callback=movie_set_2, bouncetime=300)
