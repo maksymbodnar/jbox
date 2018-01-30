@@ -2,6 +2,7 @@
 import RPi.GPIO as GPIO
 import time
 import subprocess 
+import os
 from time import sleep
 
 # Pin Definitons:
@@ -29,18 +30,25 @@ movieIndex = 0
 videoPlayer = None
 continueLoop = True 
 
-def movie_run(index):
-    global movieIndex
-    global videoPlayer
-    movieIndex = index
-    videoPlayer.terminate()
+os.system('clear')
 
 def movie_loop(index):
     global videoPlayer
-    if videoPlayer is not None and not videoPlayer.poll():
+    if videoPlayer is not None and videoPlayer.poll() is None:
         videoPlayer.terminate()
     videoPlayer = subprocess.Popen(['/usr/bin/omxplayer.bin', '-o', 'hdmi', '/home/pi/movies/' + movies[index]], stdout=subprocess.PIPE)
     videoPlayer.wait()
+
+def movie_run(index):
+    global movieIndex
+    global videoPlayer
+    print index
+    movieIndex = index
+    if videoPlayer is not None and videoPlayer.poll() is None:
+        videoPlayer.terminate()
+    else:
+        movie_loop(index)
+
 
 def movie_set_1(channel):
     movie_run(1)
