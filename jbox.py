@@ -4,6 +4,17 @@ import time
 import subprocess 
 import os
 from time import sleep
+import glob
+import logging
+import logging.handlers
+
+my_logger = logging.getLogger('MyLogger')
+my_logger.setLevel(logging.DEBUG)
+
+handler = logging.handlers.SysLogHandler(address = '/dev/log')
+
+my_logger.addHandler(handler)
+
 
 # Pin Definitons:
 btn1 = 14 # Broadcom pin 18 (P1 pin 12)
@@ -23,50 +34,60 @@ GPIO.setup(btn4, GPIO.IN, pull_up_down=GPIO.PUD_UP) # LED pin set as output
 GPIO.setup(btn5, GPIO.IN, pull_up_down=GPIO.PUD_UP) # PWM pin set as output
 GPIO.setup(btn6, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Button pin set as input w/ pull-up
 
-movies = ['bandura/bandura.mp4', 'tech/mriya.mp4', 'music/music.mp4', 'secret/for_our_friends.mp4', 'a', 'b']
+dirs   = ['bandura', 'tech', 'music', 'usb']
+homeDir = '/home/pi/movies'
 
-movieIndex = 0
+currentDir = 'bandura'
 
-videoPlayer = None
-continueLoop = True 
+videoPlayer     = None
+buttonPressed   = False
+playList        = []
 
 os.system('clear')
 
-def movie_loop(index):
+def get_dir(directory):
+    global playList
+    global homeDir
+    curDir = os.path.join(homeDir, directory)
+    print curDir
+    my_logger.info(curDir)
+    if os.path.isdir(curDir):
+        playList = glob.glob(curDir + '/*.mp4')
+        return playList
+
+def movie_loop(path):
     global videoPlayer
     if videoPlayer is not None and videoPlayer.poll() is None:
         videoPlayer.terminate()
-    videoPlayer = subprocess.Popen(['/usr/bin/omxplayer.bin', '-o', 'hdmi', '/home/pi/movies/' + movies[index]], stdout=subprocess.PIPE)
+    videoPlayer = subprocess.Popen(['/usr/bin/omxplayer.bin', '-o', 'hdmi', path], stdout=subprocess.PIPE)
     videoPlayer.wait()
 
-def movie_run(index):
-    global movieIndex
+def change_dir(newDir):
+    global currentDir
     global videoPlayer
-    print index
-    movieIndex = index
+    global buttonPressed
+    buttonPressed = True
+    currentDir = newDir
     if videoPlayer is not None and videoPlayer.poll() is None:
         videoPlayer.terminate()
-    else:
-        movie_loop(index)
-
 
 def movie_set_1(channel):
-    movie_run(1)
+    change_dir('bandura')
 
 def movie_set_2(channel):
-    movie_run(2)
+    change_dir('music')
 
 def movie_set_3(channel):
-    movie_run(3)
+    change_dir('tech')
 
 def movie_set_4(channel):
-    movie_run(4)
+    change_dir('usb')
 
 def movie_set_5(channel):
-    movie_run(5)
+    change_dir('tech')
 
 def movie_set_6(channel):
-    movie_run(6)
+    change_dir('usb')
 
 GPIO.add_event_detect(btn1, GPIO.FALLING, callback=movie_set_1, bouncetime=300)
 GPIO.add_event_detect(btn2, GPIO.FALLING, callback=movie_set_2, bouncetime=300)
@@ -76,10 +97,26 @@ GPIO.add_event_detect(btn5, GPIO.FALLING, callback=movie_set_5, bouncetime=300)
 GPIO.add_event_detect(btn6, GPIO.FALLING, callback=movie_set_6, bouncetime=300)
 
 
+dirIndex = 0
 while True:
-    movieIndex += 1
-    if movieIndex > 4:
-        movieIndex = 0
-
-    movie_loop(movieIndex)
+    if buttonPressed:
+        buttonPressed = False
+    else:
+        currentDir = dirs[dirIndex]
+        dirIndex += 1
+        if dirIndex > 3:
+            dirIndex = 0
+    playList = get_dir(currentDir)
+    if playList:
+        for fileName in playList:
+            print fileName
+            my_logger.info(fileName)
+            try:
+                movie_loop(fileName)
+                if buttonPressed:
+                    break
+            except  Exception as e:
+                logging.exception(e)
+                
+        
 
