@@ -72,22 +72,28 @@ def change_dir(newDir):
         videoPlayer.terminate()
 
 def movie_set_1(channel):
-    change_dir('bandura')
+    print 1
+    change_dir('history')
 
 def movie_set_2(channel):
+    print 2
     change_dir('music')
 
 def movie_set_3(channel):
-    change_dir('tech')
-
-def movie_set_4(channel):
+    print 3
     change_dir('usb')
 
+def movie_set_4(channel):
+    print 4
+    change_dir('tour')
+
 def movie_set_5(channel):
+    print 5
     change_dir('tech')
 
 def movie_set_6(channel):
-    change_dir('usb')
+    print 6
+    change_dir('bandura')
 
 GPIO.add_event_detect(btn1, GPIO.FALLING, callback=movie_set_1, bouncetime=300)
 GPIO.add_event_detect(btn2, GPIO.FALLING, callback=movie_set_2, bouncetime=300)
