@@ -34,7 +34,7 @@ GPIO.setup(btn4, GPIO.IN, pull_up_down=GPIO.PUD_UP) # LED pin set as output
 GPIO.setup(btn5, GPIO.IN, pull_up_down=GPIO.PUD_UP) # PWM pin set as output
 GPIO.setup(btn6, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Button pin set as input w/ pull-up
 
-dirs   = ['bandura', 'tech', 'music', 'usb']
+dirs   = ['bandura', 'tech', 'music', 'usb', 'tour', 'history']
 homeDir = '/home/pi/movies'
 
 currentDir = 'bandura'
@@ -110,7 +110,7 @@ while True:
     else:
         currentDir = dirs[dirIndex]
         dirIndex += 1
-        if dirIndex > 3:
+        if dirIndex > 5:
             dirIndex = 0
     playList = get_dir(currentDir)
     if playList:
